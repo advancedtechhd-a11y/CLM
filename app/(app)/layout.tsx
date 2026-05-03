@@ -1,0 +1,41 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function AppLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/signin");
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-lg font-bold">
+            Lifecycle<span className="text-blue-600">AI</span>
+          </h1>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-600">{user.email}</span>
+            <form action="/auth/signout" method="post">
+              <button
+                type="submit"
+                className="text-sm text-gray-600 hover:text-gray-900"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
+        </div>
+      </header>
+      <main className="p-6">{children}</main>
+    </div>
+  );
+}
