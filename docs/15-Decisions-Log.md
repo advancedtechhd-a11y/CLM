@@ -182,6 +182,14 @@ See [[12-Pricing]].
 
 ---
 
+## 2026-05-04 — GitHub repo created
+
+**Decision:** Private repo at `https://github.com/advancedtechhd-a11y/CLM` (under same org as VidForge). Branch: `main`. Local folder name and repo name differ — local is `lifecycle-dev`, repo is `CLM` — final product name TBD; either can be renamed later.
+
+**Initial commits pushed:** spec scaffolding + Week 1 Next.js 14.2 setup.
+
+---
+
 ## Future decisions to revisit
 
 - [ ] Final product name (after MVP build, before public launch)
