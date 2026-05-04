@@ -1,219 +1,260 @@
 # 11 — Integrations
 
-## Phase 1 (MVP) — minimal viable integrations
+## Phase 1 (MVP) — Shopify-first
+
+Distribution strategy: **Shopify App Store + Shopify Billing API from day 1.** This is the major change from earlier drafts that proposed Stripe-first.
 
 | Integration | Type | Priority | Build time |
 |-------------|------|----------|------------|
-| **Stripe** | Read (OAuth) | Required | 3–5 days |
-| **Shopify** | Read (OAuth) | Required | 5–10 days |
-| **CSV upload** | Read | Required | 2–3 days |
-| **Klaviyo** | Read + Write (API key) | Required | 1–2 weeks |
-| **Website crawl** | Read (public) | Required | 3–5 days |
+| **Shopify** | OAuth (App Store install) | **PRIMARY — required** | 1-2 weeks |
+| **Shopify Billing API** | Subscription billing | **PRIMARY — required** | 3-5 days |
+| **Website crawl** | Read (public) for brand profile | Required | 3-5 days |
+| **CSV upload** | Fallback for non-Shopify | Required | 2-3 days |
 
-This covers ~85% of small e-com / SaaS / course creator businesses.
+That's it for MVP. Everything else is Phase 2.
 
-## Phase 2 — extended integrations
+## Why Shopify-first (not Stripe-first)
 
-| Integration | Phase | Effort |
-|-------------|-------|--------|
-| Customer.io | 2 | 5–7 days |
-| Mailchimp | 2 | 5–7 days |
-| ConvertKit | 2 | 5–7 days |
-| WooCommerce | 2 | 7–10 days |
-| BigCommerce | 2 | 7–10 days |
-| ActiveCampaign | 2 | 5–7 days |
-| HubSpot | 2 | 2–3 weeks |
-| Yotpo / Stamped (reviews) | 2 | 5 days each |
-| Intercom / Gorgias (support tickets) | 2 | 7 days each |
+Earlier drafts proposed Stripe-first because Stripe has broader market coverage (~80% of online businesses use Stripe). Reversed that decision because:
 
-## Phase 3 — advanced integrations
+| Factor | Stripe-first | Shopify-first |
+|--------|--------------|---------------|
+| Initial market | Wider (e-com + SaaS + courses) | Narrower (Shopify only) |
+| **Distribution** | None — paid ads only | **Shopify App Store** = organic discovery |
+| Buyer urgency | Low (general "I should improve retention") | High (already on Shopify, looking for apps) |
+| Integration depth | OK (transactions only) | Better (orders, products, abandoned carts, customer tags) |
+| Sales friction | Higher (manual signup) | **Lower (one-click install via App Store)** |
+| Billing | Build Stripe subscription ourselves | **Shopify Billing API** — frictionless |
+| Trial conversion | Custom to build | **Shopify Billing handles automatically** |
 
-| Integration | Phase | Notes |
-|-------------|-------|-------|
-| Magento | 3 | Enterprise customers |
-| Square Online | 3 | Smaller market |
-| Wix Stores | 3 | Limited API |
-| Squarespace Commerce | 3 | Limited API |
-| Twilio (for our own SMS sending) | 3 | When we add send-it-ourselves |
-| Postmark / SES (for our own email) | 3 | When we add send-it-ourselves |
+**Focus + free distribution beats wider market without distribution.** Shopify App Store organic discovery is a real moat for Shopify-targeted products.
 
----
+CSV upload remains as a fallback for non-Shopify merchants who want to try before integrating.
 
-## Stripe integration (MVP — primary data source)
+## Phase 2 — extended integrations (months 4-9)
 
-### What we get
-- Customer records + creation dates
-- Charges, refunds, disputes
-- Subscriptions (if any) — active, paused, canceled, churn
-- Payment methods (BNPL detection: Klarna, Affirm, etc.)
-- Failed payments (key churn signal for SaaS)
-- Customer addresses (geographic clustering)
+| Integration | When | Why |
+|-------------|------|-----|
+| Klaviyo (full read + write) | v1.5 | Read engagement data, push flows |
+| Customer.io | v1.5 | Alternative to Klaviyo |
+| Mailchimp | v1.5 | Long-tail SMB merchants |
+| ConvertKit | v1.5 | Course creators |
+| Postscript | v1.5 | SMS-focused merchants |
+| Yotpo / Stamped (reviews) | v2 | Advocacy detection signals |
+| Intercom / Gorgias (support tickets) | v2 | Complaint signals for At Risk detection |
 
-### How (Stripe Connect)
-- OAuth flow — merchant clicks "Connect Stripe"
-- We get an `account_id` + access token
-- Read-only scope (no writing)
-- API: `https://api.stripe.com/v1/customers`, `/charges`, `/subscriptions`
+## Phase 3 — advanced integrations (months 9-18)
 
-### Why Stripe-first matters
-**~80% of online businesses use Stripe regardless of platform** (Shopify with Stripe Payments, custom sites, course platforms, SaaS). One integration covers everyone.
+| Integration | When | Notes |
+|-------------|------|-------|
+| Recharge / Bold subscriptions | v2 | Subscription/replenishment layer |
+| WooCommerce | v2.5 | Multi-platform expansion begins |
+| BigCommerce | v2.5 | Mid-market merchants |
+| ActiveCampaign | v2.5 | Mid-market alternative to Klaviyo |
+| Magento | v3 | Enterprise customers |
+| HubSpot | v3 | B2B-leaning merchants |
+| Meta Business / Google Ads | v3 | Acquisition layer (Triple Whale territory) |
 
 ---
 
-## Shopify integration (MVP — adds e-com depth)
+## Shopify integration (MVP — primary data source)
 
-### What we get
-- Order line items + product details
-- Cart abandonment events
-- Customer tags + lifetime value field
-- Discount code usage
-- Product catalog (for NBP)
-- Shipping addresses (geographic)
+### OAuth flow
 
-### Distribution paths
+Standard Shopify OAuth via App Store install:
+1. Merchant clicks "Install" on App Store listing
+2. Redirect to Shopify auth page with required scopes
+3. Shopify redirects back with auth code
+4. Exchange auth code for access token
+5. Store encrypted access token in `merchants.shopify_access_token`
+6. Begin initial data sync (background job)
+7. Set up Shopify Billing API subscription
 
-**Path A: Custom app install (start here)**
-- Direct merchant flow: they install our app via API key
-- No Shopify approval needed
-- 5-10 days to build
-- Faster time-to-market
+### Required scopes
 
-**Path B: Shopify App Store listing (Phase 2)**
-- 4–8 week approval process
-- Organic discovery via Shopify recommendations
-- Shopify takes 0–15% revenue share
-- Worth it for distribution at scale
+```
+read_customers, read_orders, read_products, read_marketing_events,
+read_discounts, read_price_rules, read_themes, read_checkouts
+```
 
-We do Path A first, Path B once we have customers.
+### Initial data sync (Shopify GraphQL Bulk Operations)
 
----
+For efficient backfill of historical data:
 
-## CSV upload (MVP — universal fallback)
-
-For merchants who:
-- Don't use Stripe or Shopify
-- Want to try the product before connecting accounts
-- Use exotic platforms (Magento, custom)
-
-Required columns (minimum):
-- `customer_email` (or hashed ID)
-- `first_purchase_date`
-- `total_revenue`
-
-Optional but valuable:
-- `last_purchase_date`
-- `purchase_count`
-- `last_purchase_value`
-- `acquisition_source`
-- `geography`
-
-System parses, infers structure, runs analysis. Limited functionality vs. live integrations but sufficient for trial use.
-
----
-
-## Klaviyo integration (MVP — read + write)
-
-### Read access (engagement data)
-What we pull from Klaviyo:
-- Email opens, clicks, unsubscribes per customer
-- Existing segments + flow performance
-- SMS engagement (if Klaviyo SMS is active)
-
-Why: feeds engagement data into our scoring (channel propensity, at-risk signals).
-
-### Write access (push strategies)
-What we push to Klaviyo:
-- Segments (live, dynamic) — we create them with rules
-- Flows (with triggers, copy, offers, exits)
-- Templates (brand-voice email bodies)
-
-The "killer feature" — one-click strategy → Klaviyo flow. Saves merchants hours per program.
-
-Klaviyo API: `https://a.klaviyo.com/api/v1/...`. Authentication via API key (not OAuth).
-
-### Klaviyo flow JSON structure (simplified)
-```json
-{
-  "flow": {
-    "name": "Dormancy Final Attempt — Generated by LifecycleAI",
-    "trigger": {
-      "type": "segment_entered",
-      "segment_id": "abc123"
-    },
-    "actions": [
-      {
-        "type": "send_email",
-        "template_id": "tpl_xyz",
-        "delay": "0d"
-      },
-      {
-        "type": "delay",
-        "duration": "7d"
-      },
-      {
-        "type": "send_email",
-        "template_id": "tpl_abc",
-        "delay": "0d"
+```graphql
+mutation {
+  bulkOperationRunQuery(
+    query: """
+    {
+      orders {
+        edges {
+          node {
+            id
+            name
+            createdAt
+            totalPriceSet { shopMoney { amount currencyCode } }
+            customer { id email }
+            lineItems {
+              edges {
+                node {
+                  product { id title productType }
+                  variant { id sku }
+                  quantity
+                  originalUnitPriceSet { shopMoney { amount } }
+                }
+              }
+            }
+          }
+        }
       }
-    ]
-  }
+    }
+    """
+  ) { ... }
 }
 ```
 
-Library: Klaviyo doesn't have an official Node SDK but `node-klaviyo` and direct REST calls work fine.
+Sync strategy:
+1. Create bulk operation for last 24 months of orders (or all available)
+2. Poll bulk operation status
+3. Download JSONL result file
+4. Parse and insert into `orders`, `order_line_items`, `customers`, `products` tables
+5. Trigger initial metrics computation
+6. Notify merchant via UI when complete
+
+For typical small/mid stores: 5-30 minutes.
+For Plus stores with millions of orders: 1-4 hours.
+
+### Real-time webhooks
+
+Subscribe to Shopify webhooks for incremental updates:
+
+```
+orders/create, orders/updated, orders/cancelled, orders/fulfilled
+customers/create, customers/update
+products/create, products/update, products/delete
+checkouts/create, checkouts/update  (for cart abandonment v1.5+)
+app/uninstalled  (for cleanup)
+```
+
+Mandatory privacy webhooks (required for App Store approval):
+```
+customers/redact, shop/redact, customers/data_request
+```
+
+Webhook handler pattern:
+1. Verify HMAC signature from Shopify
+2. Push raw event to background queue (Inngest)
+3. Worker processes event, updates database, triggers metric recomputation
+
+### Rate limiting
+
+Shopify API rate limits:
+- Standard plan: 40 calls/sec REST, 1000 cost units GraphQL
+- Plus plan: 80 calls/sec REST, 2000 cost units GraphQL
+
+Implement:
+- Exponential backoff on 429 responses
+- Request queuing per merchant
+- Use bulk operations for large data pulls (no rate limits, just throughput)
+
+---
+
+## Shopify Billing API (MVP — frictionless subscriptions)
+
+### Why use Shopify Billing (not Stripe direct)
+
+For App Store distribution, **Shopify Billing API is mandatory.** Benefits:
+- Charges appear on merchant's existing Shopify bill (unified billing — frictionless)
+- Trial period managed via Shopify Billing automatically
+- Plan upgrades/downgrades via API
+- Shopify handles failed payments, dunning, refunds
+- App Store policy compliance (App Store rejects custom billing for Shopify-installed apps)
+
+### Pricing tiers via Shopify Billing
+
+```javascript
+const subscription = await shopify.recurringApplicationCharge.create({
+  name: "LifecycleAI - Starter",
+  price: 99,
+  return_url: "https://lifecycleai.com/billing/callback",
+  trial_days: 14,
+  test: false  // true for development
+});
+```
+
+Plans match [[12-Pricing]]:
+- Starter: $99/mo, 14-day trial
+- Growth: $249/mo
+- Pro: $599/mo
+- Agency: $999/mo
+
+### Shopify revenue share
+
+- 0% under $1M annual (small developer terms — applies to us until that point)
+- 15% above $1M annual (only on revenue from Shopify-installed merchants)
+
+### Plan management
+
+- Upgrades/downgrades via UI → call Shopify Billing API to create new subscription
+- Old subscription auto-cancelled
+- Mid-cycle: prorated automatically by Shopify
 
 ---
 
 ## Website crawl (MVP — brand profile)
 
 ### Detection
-After Stripe/Shopify connect, auto-detect website:
-- Stripe `business_profile.url` field (~80% reliable)
-- Shopify `shop.domain` field (100% reliable)
-- Fallback: ask in onboarding wizard
+
+After Shopify install, auto-extract website:
+- Shopify `shop.domain` field returns the public domain (100% reliable)
+- For CSV-only merchants: ask in onboarding wizard
 
 ### Crawl scope
-~5–10 key pages:
+
+5–10 key pages:
 - Homepage (hero, value prop, voice)
 - About page (brand story, customer persona)
 - Top product pages (catalog, naming, descriptions)
-- Pricing page (for SaaS)
 - Reviews page (customer voice — Phase 2 deeper)
 
 ### Tech
+
 - HTTP fetcher (Node `fetch` or `cheerio` for parsing)
 - For JS-heavy SPAs (headless Shopify): Playwright
 - Respect `robots.txt`
 - Rate limit: 1 req/sec per domain
-- Custom User-Agent: `LifecycleAI Bot — yourdomain.com/bot`
+- Custom User-Agent: `LifecycleAI Bot — lifecycleai.com/bot`
 
 ### Brand profile output
-Stored per client, referenced by LLM for copy generation:
 
-```json
-{
-  "business_name": "GlowSkincare",
-  "category": "Beauty / Skincare",
-  "sub_category": "Clean beauty / anti-aging",
-  "target_customer": "Women 28-45, mid-market, eco-conscious",
-  "voice": "Friendly, science-backed, approachable",
-  "voice_sample": "Your skin knows what it needs — we just help it remember",
-  "price_tier": "Mid-market ($25-95)",
-  "catalog_size": 47,
-  "top_categories": ["serums", "moisturizers", "cleansers", "masks"],
-  "key_claims": ["vegan", "cruelty-free", "dermatologist-tested"],
-  "geographic_focus": ["US", "Canada"],
-  "currency": "USD",
-  "uses_klaviyo": true,
-  "uses_subscribe_save": false,
-  "loyalty_program": "Smile.io detected"
-}
-```
+Stored per merchant, referenced by LLM for copy generation. See [[16-AI-Brain-Spec]] for the full extraction prompt and output schema.
 
-### Refresh cadence
-- Initial crawl on onboarding
-- Re-crawl quarterly (catalog changes)
-- Manual refresh trigger from dashboard
+---
+
+## CSV upload (MVP — fallback)
+
+For merchants who:
+- Don't use Shopify (custom-built sites, WooCommerce, etc.)
+- Want to try the product before installing the Shopify App
+- Test data integration
+
+### Required columns (minimum)
+
+- `customer_email` (or hashed ID)
+- `first_purchase_date`
+- `total_revenue`
+
+### Optional but valuable
+
+- `last_purchase_date`
+- `purchase_count`
+- `last_purchase_value`
+- `acquisition_source`
+- `geography`
+
+System parses, infers structure, runs analysis. **Limited functionality vs. live Shopify integration** but sufficient for trial use. Without webhooks, data goes stale — UI shows "last synced" timestamp.
+
+CSV-uploaded merchants pay via Stripe (not Shopify Billing).
 
 ---
 
@@ -221,27 +262,41 @@ Stored per client, referenced by LLM for copy generation:
 
 ```
 Initial onboarding:
-  ├─ Pull last 12-24 months of data (one-shot, can take 5-15 min)
+  ├─ Shopify Bulk Operations: pull last 24 months of orders
   ├─ Store raw + computed
-  └─ Trigger initial analysis
+  └─ Trigger initial analysis (rules + ML + LLM)
 
-Ongoing sync (every 1-6 hours):
-  ├─ Incremental — only new/changed records
+Ongoing sync (real-time via webhooks):
+  ├─ Process new orders/customers/products as they happen
   ├─ Update segment memberships
-  ├─ Detect events (cart abandon, BNPL late, etc.)
+  ├─ Detect events (cart abandon, refund, etc.)
   └─ Fire alerts if anomalies
 
-Full refresh (monthly):
-  └─ Recompute everything — segments, scores, strategies
+Daily refresh (background):
+  └─ Recompute metrics, scores, strategies, narratives
 ```
 
 ## Security / privacy
 
-- All API tokens encrypted at rest (Supabase column encryption)
+- All API tokens encrypted at rest (Supabase Vault or pgcrypto)
 - OAuth tokens refreshed automatically
-- Never log raw customer PII in our application logs
+- Never log raw customer PII in application logs
 - GDPR / CCPA: support data deletion requests within 30 days
 - Read-only by default — minimizes blast radius if breached
+- Honor Shopify mandatory privacy webhooks (`customers/redact`, `shop/redact`, `customers/data_request`)
 - We don't share/sell any customer data
 
 See [[15-Decisions-Log]] for IP/employer-separation considerations.
+
+## App Store submission
+
+Shopify App Store review takes 4-8 weeks. Start submission process at Week 14 of build plan to align with Week 18-20 launch.
+
+Required for submission:
+- Privacy policy (covers ML training on anonymized features — see [[19-ML-Privacy]] when added)
+- Terms of Service
+- App listing copy + screenshots + demo video
+- HMAC verification on all webhooks
+- Mandatory privacy webhooks implemented
+- GDPR-compliant data handling
+- Support email + response SLA documented

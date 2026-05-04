@@ -218,6 +218,53 @@ Lead → New → Active → Slipping → At Risk → Churned → Dormant
 - If 1-2 purchases: blend customer + merchant median (weighted by data confidence)
 - If 0-1 purchases: fall back to merchant median entirely
 
+## 2026-05-05 — Pricing changed to $99/$249/$599/$999
+
+**Trigger:** PRODUCT_SPEC merge analysis showed our pricing was too low for the buyer profile and product positioning.
+
+**Decision:** Update pricing tiers from $39/$99/$249/$499 to **$99/$249/$599/$999** (plus Enterprise custom).
+
+**Why:**
+- Buyer profile is $500K-$50M GMV Shopify merchants who already pay $50-500/mo for Klaviyo. $39 signals "low-value tool"
+- Solo founder support burden: 200 customers @ $99 = same MRR as 500 @ $39, but 2.5× less support load
+- LTV at $99 (24-mo retention) = $2,376 — comfortably justifies LLM/ML COGS
+- Premium feature set (Customer Health Score, Revenue at Risk, ML predictions, AI copy) deserves premium pricing
+- Anchors well against consultant alternative ($5-15k engagement) and competitive products (Triple Whale $129+, Lifetimely $79+)
+
+## 2026-05-05 — Distribution: Shopify-first + App Store from day 1
+
+**Trigger:** PRODUCT_SPEC merge analysis showed Shopify App Store distribution is the real moat for Shopify-targeted products.
+
+**Decision:** Reverse earlier "Stripe-first" decision. **Shopify is the primary integration from day 1.** App Store listing required for launch. Shopify Billing API for subscription management. CSV upload remains as fallback for non-Shopify merchants.
+
+**Why:**
+- Shopify App Store organic discovery = free top-of-funnel (vs. paid ads only with Stripe-first)
+- One-click install via App Store = lowest possible friction (vs. manual signup)
+- Shopify Billing API handles subscription lifecycle automatically (trial, conversion, dunning, plan changes)
+- Buyer urgency higher for Shopify merchants (already on platform looking for apps) vs general "I should improve retention"
+- Integration depth better with Shopify (orders + products + abandoned carts + customer tags vs. Stripe's transactions only)
+- Focus + free distribution > wider market without distribution
+
+**Trade-off accepted:** Smaller initial market (Shopify only vs Stripe's broader coverage), but distribution channel value outweighs market breadth for MVP.
+
+**Build plan impact:**
+- Week 4-5: Shopify OAuth + Shopify Billing API
+- Week 14: Submit App Store listing (4-8 week review window)
+- Week 18-20: Launch coincides with App Store approval
+
+## 2026-05-05 — 5 differentiating metrics added to MVP scope
+
+**Decision:** Add Customer Health Score, Revenue at Risk, First-to-Second Tracker, Concentration Risk, and Discount Dependency Score to MVP scope. New doc: [[18-Differentiating-Metrics]].
+
+**Schedule impact:** ~+1 week to MVP build (19-21 weeks instead of 18-20).
+
+**Why:**
+- Customer Health Score is "the single most differentiating metric" — banks/B2B CS use this pattern, e-com hasn't widely adopted
+- Revenue at Risk is the dashboard hero metric that justifies subscription cost in dollars
+- First-to-Second is the highest-ROI lifecycle stage (most expensive transition)
+- Concentration Risk and Discount Dependency are sophisticated metrics that build trust + differentiate from Klaviyo
+- All slot into existing 3-layer architecture (Layer 1 rules engine using Layer 2 ML scores)
+
 ## 2026-05-05 — Threshold method: Option A (multipliers) for MVP, Option B (percentiles) for v1.5+
 
 **Decision:** Use **multipliers of median** for MVP threshold computation, with **automatic upgrade to raw percentiles** once a merchant has >200 customers with 2+ orders.

@@ -10,48 +10,56 @@
 - ✅ **Threshold strategy locked:** Option A (multipliers) for MVP, Option B (percentiles) auto-upgrade at >200 customers
 - ✅ Decisions logged in [[15-Decisions-Log]]
 
-### Major gaps identified in our spec (still TO ADOPT)
+### ✅ Adopted in this session (now in docs)
 
-These features are in PRODUCT_SPEC but not yet integrated into our docs:
+🔴 **Tier 1 — Differentiating metrics (added to [[18-Differentiating-Metrics]] doc):**
+1. ✅ Customer Health Score (0-100 composite per customer with 5 sub-scores)
+2. ✅ Revenue at Risk (merchant-level dollar hero metric)
+3. ✅ First-to-Second Purchase Tracker (dedicated metric with industry benchmarks)
+4. ✅ Customer Concentration Risk (Pareto top-10% concentration)
+5. ✅ Discount Dependency Score (per-customer + merchant-wide)
 
-🔴 **Tier 1 — Major missing features (decided to adopt, not yet written into docs):**
-1. Customer Health Score (0-100 composite per customer with 5 sub-scores)
-2. Revenue at Risk (merchant-level dollar hero metric)
-3. First-to-Second Purchase Tracker (dedicated metric with industry benchmarks)
-4. Customer Concentration Risk (Pareto top-10% concentration)
-5. Discount Dependency Score (per-customer + merchant-wide)
+🏗️ **Architecture decisions (locked):**
+- ✅ Pricing tier update: **$99/$249/$599/$999** (was $39/$99/$249/$499)
+- ✅ Distribution: **Shopify-first + Shopify Billing API + App Store from day 1** (was Stripe-first)
+- ✅ Build timeline: **19-21 weeks** (was 18-20)
+- ✅ App Store submission begins Week 14 (4-8 week review window)
 
-🟡 **Tier 2 — Should adopt for v1.5+:**
-6. Saturation/Fatigue Detection (cross-channel touch tracking)
-7. Replenishment Layer (subscription opt-in detection)
-8. Customer Concierge Timeline (full event log per customer)
-9. Predicted vs Actual public widget (credibility builder)
-10. Acquisition Quality Score (UTM source × CLV/churn)
-11. Margin-Aware Recommendations (profit, not revenue)
+### Still pending (deferred to v1.5 / v2):
 
-🏗️ **Tier 3 — Architecture/business model decisions still pending:**
-12. Pricing tier update — adopt PRODUCT_SPEC's $99/$249/$599 instead of our $39/$99/$249/$499?
-13. Shopify-first + Shopify Billing API + App Store from day 1?
-14. ML Privacy Framework + Isolated Mode (enterprise tier opt-out)
-15. Holdout testing for causal attribution
-16. Conversational LLM-driven onboarding (vs static wizard)
-17. Quarterly Industry Benchmark Report (marketing strategy)
-18. Today View as primary daily screen (UX framing)
+🟡 **Tier 2 — v1.5+ features:**
+6. Klaviyo full integration (read engagement + push flows)
+7. Saturation/Fatigue Detection (cross-channel touch tracking)
+8. Replenishment Layer (subscription opt-in detection)
+9. Customer Concierge Timeline (full event log per customer)
+10. Predicted vs Actual public widget (credibility builder)
+11. Holdout testing for causal attribution
+
+🟢 **Tier 3 — v2+ items:**
+12. ML Privacy Framework + Isolated Mode (enterprise tier opt-out) — needs new doc 19-ML-Privacy.md
+13. Acquisition Quality Score (UTM source × CLV/churn)
+14. Margin-Aware Recommendations (profit, not revenue)
+15. Conversational LLM-driven onboarding (vs static wizard)
+16. Quarterly Industry Benchmark Report (marketing strategy — separate from product features)
+17. Today View as primary daily screen (UX framing — Phase 6 implementation detail)
 
 ### Next session — start here
-1. Continue gap analysis: walk through Tier 1 features one by one and write them into our docs
-   - Start with Customer Health Score (biggest single addition)
-   - Then Revenue at Risk
-   - Then First-to-Second, Concentration Risk, Discount Dependency
-2. Discuss Tier 3 architecture decisions (pricing, distribution, ML privacy)
-3. Decide: do these gaps go into existing docs (02-17) or a new doc 18-Differentiating-Metrics?
-4. After spec merge: fix the dev server / Tailwind issue from 5/4 session
-5. Then resume Week 2-3 build
+1. **Fix the dev server / Tailwind issue** from 5/4 session (delete `.next/`, restart `npm run dev`, hard-refresh browser)
+2. Verify signup → email verification → dashboard works end-to-end
+3. Resume **Week 2-3 build** with updated spec:
+   - Update auth pages with refreshed Tailwind classes
+   - Begin dashboard shell (sidebar, header, settings)
+   - Plan Shopify integration for Week 4-6
+4. Optional: write [[19-ML-Privacy]] doc (Isolated Mode framework) — only matters when multi-tenant ML kicks in (v1.5+)
 
 ### Files updated this session
-- `02-Lifecycle-Framework.md` — rewrote with 7+3 framework, median, multiplier thresholds
-- `03-Segmentation.md` — updated tier structure (3 tiers, not 4), updated stage list
-- `15-Decisions-Log.md` — added 3 new decisions
+- `02-Lifecycle-Framework.md` — 7+3 framework, median, multiplier thresholds
+- `03-Segmentation.md` — 3 tiers (Standard/Premium/VIP), 7 stages
+- `11-Integrations.md` — **Shopify-first** (was Stripe-first), Shopify Billing API, CSV fallback
+- `12-Pricing.md` — **$99/$249/$599/$999** tiers
+- `14-Build-Plan.md` — 19-21 weeks, integrated metrics into Phase 3 + 7
+- `15-Decisions-Log.md` — 5 new dated decisions
+- `18-Differentiating-Metrics.md` — **NEW** — Health Score, Revenue at Risk, First-to-Second, Concentration Risk, Discount Dependency
 - `SESSION-NOTES.md` — this file
 
 ---

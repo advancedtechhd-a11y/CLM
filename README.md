@@ -16,11 +16,14 @@ The full project specification lives in `docs/` as a markdown vault — open it 
 
 ## What this is
 
-A self-serve SaaS that:
-- Connects to a merchant's Stripe / Shopify / CSV
+A Shopify App Store SaaS for e-commerce merchants that:
+- Installs in one click via Shopify App Store
 - Runs banking-grade customer lifecycle analysis (segmentation, CLV, churn, NBP, NBO)
+- Surfaces Customer Health Score (0-100 per customer) and Revenue at Risk (merchant hero metric)
 - Generates a complete lifecycle program: segments, journeys, copy, offers
-- Pushes the strategy to the merchant's existing execution tool (Klaviyo, Customer.io, etc.)
+- Exports strategies to merchant's existing execution tool (Klaviyo, Customer.io, etc.) in v1.5+
+
+CSV upload available as fallback for non-Shopify merchants.
 
 ## Architecture (3 layers)
 

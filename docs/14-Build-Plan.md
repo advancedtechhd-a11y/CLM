@@ -1,6 +1,8 @@
 # 14 — Build Plan
 
-## Total timeline: 18–20 weeks of evening/weekend work
+## Total timeline: 19–21 weeks of evening/weekend work
+
+(Updated 2026-05-05 — added 5 differentiating metrics from [[18-Differentiating-Metrics]]; switched from Stripe-first to Shopify-first distribution. See [[15-Decisions-Log]].)
 
 Owner is full-time employed. Realistic capacity: ~10–15 hours/week.
 
@@ -9,14 +11,15 @@ Owner is full-time employed. Realistic capacity: ~10–15 hours/week.
 | Phase | Weeks | Hours est. | What |
 |-------|-------|------------|------|
 | 1. Foundation | 1–3 | 30–40 | Project setup, auth, basic dashboard |
-| 2. Integrations | 3–6 | 50–70 | Stripe + Shopify OAuth, brand crawl, CSV |
-| 3. Rules engine | 6–10 | 60–80 | Segmentation, stage logic, dynamic thresholds, scoring |
-| 4. ML models | 10–13 | 50–70 | CLV (BG-NBD), NBP (collab filter), Churn |
-| 5. LLM integration | 13–15 | 30–40 | Brand voice, copy generation, narrative reports |
-| 6. Strategy generator | 15–17 | 40–50 | Combines rules + ML + LLM into program output |
-| 7. Klaviyo export | 17–18 | 20–30 | One-click flow creation via API |
-| 8. Reporting | 18–20 | 30–40 | Per-program performance, stage health, attribution |
-| 9. Polish + testing | 20+ | ongoing | UI refinement, bug fixes, friend's-store testing |
+| 2. Shopify integration | 3–6 | 60–80 | **Shopify OAuth + Shopify Billing API**, brand crawl, CSV fallback |
+| 3. Rules engine | 6–11 | 70–90 | Segmentation, 7-stage logic, **Customer Health Score**, **Concentration Risk**, **Discount Dependency**, dynamic thresholds, scoring |
+| 4. ML models | 11–14 | 50–70 | CLV (BG-NBD), NBP (collab filter), Churn |
+| 5. LLM integration | 14–16 | 30–40 | Brand voice, copy generation, narrative reports |
+| 6. Strategy generator | 16–18 | 40–50 | Combines rules + ML + LLM into program output |
+| 7. Klaviyo export (deferred to v1.5) | — | — | Now in v1.5 phase, not MVP |
+| 8. Reporting | 18–20 | 40–50 | Per-program performance, stage health, attribution, **Revenue at Risk dashboard hero**, **First-to-Second Tracker** |
+| 9. App Store submission | 14 (parallel) | 20 | Begin Shopify App Store review (4-8 week window) |
+| 10. Polish + testing | 20–21 | ongoing | UI refinement, bug fixes, friend's-store testing |
 
 ## Phase 1 — Foundation (weeks 1–3)
 
