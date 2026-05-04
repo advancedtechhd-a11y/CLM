@@ -218,6 +218,31 @@ Lead → New → Active → Slipping → At Risk → Churned → Dormant
 - If 1-2 purchases: blend customer + merchant median (weighted by data confidence)
 - If 0-1 purchases: fall back to merchant median entirely
 
+## 2026-05-05 — Klaviyo + multi-tool exports confirmed deferred to v1.5 (P0)
+
+**Trigger:** User confirmed deferral after gap analysis identified them as removed-from-MVP items.
+
+**Decision:** Lock both as **P0 priorities for v1.5** (months 4-7 post-MVP). Not in MVP. MVP ships with CSV export only.
+
+**v1.5 P0 list:**
+1. **Klaviyo full integration** (read engagement + one-click flow push) — 3-4 weeks
+2. **Customer.io / Mailchimp / ConvertKit / Postscript exports** — ~4 weeks total
+
+**Why deferred (and why NOT in MVP):**
+- Combined ~7-8 weeks of build time would push MVP from 21 weeks to 28-29 weeks
+- MVP can validate willingness-to-pay with CSV export alone
+- Klaviyo's flow API is complex and benefits from iteration with paying customers
+- Better to ship and learn than over-engineer pre-revenue
+- Most Shopify merchants can manually create flows from CSV exports for v1; the automation is a v1.5 upgrade
+
+**Why P0 for v1.5 (not P1 or later):**
+- "One-click push to Klaviyo" is the killer feature merchants will ask for most
+- Multi-tool exports cover ~95% of e-com merchants' execution stack
+- Without these, customer LTV at risk after first 3-6 months
+- These features unlock the "automation" promise that justifies premium pricing
+
+Detailed v1.5 build plan now in [[14-Build-Plan]].
+
 ## 2026-05-05 — Multi-platform roadmap defined
 
 **Decision:** Build MVP Shopify-only with `PlatformAdapter` abstraction baked in. Phased expansion: BigCommerce + WooCommerce in v2 (months 4-9), Salla + Zid (MENA) in v2.5 (months 9-12), Magento + Saleor + Medusa in v3 (months 12-18).
