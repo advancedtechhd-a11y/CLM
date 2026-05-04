@@ -8,11 +8,17 @@ export const SHOPIFY_API_VERSION = "2024-10";
 /**
  * OAuth scopes we request on app install.
  * See: https://shopify.dev/docs/api/usage/access-scopes
+ *
+ * Write scopes are included for dev/seed purposes (so we can populate test data).
+ * For production, write_* scopes will be removed — we're a read-only analytics tool.
  */
 export const SHOPIFY_SCOPES = [
   "read_customers",
+  "write_customers",       // dev-only: for seed script
   "read_orders",
+  "write_orders",          // dev-only: for seed script
   "read_products",
+  "write_products",        // dev-only: for seed script (if needed)
   "read_marketing_events",
   "read_discounts",
   "read_price_rules",
