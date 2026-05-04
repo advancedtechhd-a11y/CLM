@@ -1,4 +1,23 @@
-export default function Home() {
+import { redirect } from "next/navigation";
+
+interface HomePageProps {
+  searchParams: Promise<{
+    shop?: string;
+    hmac?: string;
+    host?: string;
+  }>;
+}
+
+export default async function Home({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+
+  // If Shopify redirected here (e.g. from "Open app" in admin or post-install),
+  // bounce to the OAuth start route to get/refresh the access token.
+  if (params.shop && params.hmac) {
+    const oauthUrl = `/api/connect/shopify?shop=${encodeURIComponent(params.shop)}`;
+    redirect(oauthUrl);
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8">
       <div className="max-w-2xl text-center">
