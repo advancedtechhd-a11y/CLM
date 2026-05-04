@@ -11,9 +11,10 @@ export default function DashboardPage() {
         <ul className="space-y-2 text-sm text-gray-700">
           <li>✅ Week 1: Project scaffolding</li>
           <li>✅ Week 2: Auth flow (you&apos;re using it now)</li>
-          <li>⏳ Week 3: Dashboard shell, sidebar, settings</li>
-          <li>⏳ Week 4: Stripe Connect integration</li>
-          <li>⏳ Week 5+: ...</li>
+          <li>⏳ Week 3-6: Shopify integration + brand profile crawl</li>
+          <li>⏳ Week 6-11: Rules engine — segments, lifecycle stages, Customer Health Score</li>
+          <li>⏳ Week 11-14: ML models — CLV, NBP, Churn predictions</li>
+          <li>⏳ Week 14-21: LLM brain, strategy generator, reporting</li>
         </ul>
       </div>
     </div>

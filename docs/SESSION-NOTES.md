@@ -43,14 +43,23 @@
 16. Quarterly Industry Benchmark Report (marketing strategy — separate from product features)
 17. Today View as primary daily screen (UX framing — Phase 6 implementation detail)
 
+### ✅ Resolved 2026-05-05
+- Dev server / Tailwind issue: fixed by clearing `.next/` cache + fresh `npm run dev`
+- Auth flow verified end-to-end (signup → email verify → dashboard)
+- Dashboard placeholder updated to reflect Shopify-first plan
+
 ### Next session — start here
-1. **Fix the dev server / Tailwind issue** from 5/4 session (delete `.next/`, restart `npm run dev`, hard-refresh browser)
-2. Verify signup → email verification → dashboard works end-to-end
-3. Resume **Week 2-3 build** with updated spec:
-   - Update auth pages with refreshed Tailwind classes
-   - Begin dashboard shell (sidebar, header, settings)
-   - Plan Shopify integration for Week 4-6
-4. Optional: write [[19-ML-Privacy]] doc (Isolated Mode framework) — only matters when multi-tenant ML kicks in (v1.5+)
+1. **Phase 2 — Shopify integration** (Weeks 3-6 of plan)
+   - Spawn Ruflo swarm: 1 architect + 2 backend-dev coders + 1 tester
+   - Build: Shopify OAuth, Bulk Operations sync, webhook handlers, brand profile crawler, CSV upload fallback
+   - Use Shopify dev store for testing (no approval needed for custom apps)
+   - Milestone: dev store data syncs end-to-end
+2. Optional: write [[20-ML-Privacy]] doc (Isolated Mode framework) — only matters when multi-tenant ML kicks in (v1.5+)
+
+### Prerequisites for next session
+- [ ] Shopify Partner account created (https://partners.shopify.com)
+- [ ] Dev store created (xxxxx.myshopify.com)
+- [ ] Shopify Partner API credentials accessible (Partner Dashboard → Apps → Create app)
 
 ### Files updated this session
 - `02-Lifecycle-Framework.md` — 7+3 framework, median, multiplier thresholds
