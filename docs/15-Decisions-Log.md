@@ -182,6 +182,70 @@ See [[12-Pricing]].
 
 ---
 
+## 2026-05-05 — Lifecycle framework upgraded to 7 stages + 3 tiers
+
+**Trigger:** User shared external `PRODUCT_SPEC.md` (2,126 lines) with an alternative 11-stage model. Comparison conducted; gaps identified.
+
+**Decision:** Replace original 6-stage framework with **7 stages + 1 orthogonal tier dimension + behavior badges**.
+
+**New 7 stages (mutually exclusive):**
+Lead → New → Active → Slipping → At Risk → Churned → Dormant
+
+**3 tiers (separate column):** Standard / Premium / VIP (CLV-based)
+
+**Badges (behavior-based, multi-select):** won_back, champion, referrer, reviewer, ugc_creator
+
+**Why:**
+- Old 6-stage was too coarse — collapsed Slipping/At Risk/Churned into "Retention" and "Win-back," losing intervention granularity
+- PRODUCT_SPEC's 11-stage was better on granularity but mixed phases/tiers/badges in one column (data model nesting issue)
+- Hybrid 7+3+badges keeps the granularity AND fixes the nesting problem
+- Won-back as 30-day badge (not stage) preserves tracking without state-machine complexity
+
+## 2026-05-05 — Median replaces mean for all cycle calculations
+
+**Trigger:** PRODUCT_SPEC explicitly uses median (not mean) for typical repurchase cycle. Our spec was inconsistent — used 75th percentile for some thresholds, "average" for others.
+
+**Decision:** **Median throughout.** No use of arithmetic mean for repurchase intervals.
+
+**Why:**
+- Repurchase intervals are right-skewed distributions (long tail of customers with huge gaps pulls mean upward)
+- Mean misses "typical customer" behavior; median captures it
+- Industry standard for similar metrics in banking, telco, fraud detection
+- Concrete example: skincare brand with 80 normal customers (35-45 day cycles) + 5 outliers (250-365 days). Mean = ~67 days. Median = ~38 days. Threshold = "1.5× normal" should be ~57 days, not ~100 days.
+
+**Per-customer vs merchant median:**
+- If customer has ≥3 purchases: use customer's own median
+- If 1-2 purchases: blend customer + merchant median (weighted by data confidence)
+- If 0-1 purchases: fall back to merchant median entirely
+
+## 2026-05-05 — Threshold method: Option A (multipliers) for MVP, Option B (percentiles) for v1.5+
+
+**Decision:** Use **multipliers of median** for MVP threshold computation, with **automatic upgrade to raw percentiles** once a merchant has >200 customers with 2+ orders.
+
+**Option A (MVP):**
+- Active: ≤ 1.0× median
+- Slipping: 1.0–1.5× median
+- At Risk: 1.5–2.5× median
+- Churned: > 2.5× median
+- Dormant: > 4× median (after failed Tier 4 win-back)
+
+**Option B (v1.5+, when data is sufficient):**
+- Active: ≤ p50 (median)
+- Slipping: p50–p75
+- At Risk: p75–p90
+- Churned: > p90
+
+**Why this evolution:**
+- For typical right-skewed distributions, A and B produce similar segmentation 80-90% of the time
+- A wins for new merchants (<200 customers) — multipliers are stable on small samples; percentiles flap
+- B wins for mature merchants and edge cases — distribution-shape aware (handles bimodal, heavy-tail patterns)
+- B is industry-standard for serious analytics (banks, telcos, academic CRM)
+- Sophisticated buyers (Plus brands) prefer percentile rigor — credibility advantage at premium pricing tiers
+
+**Implementation:** Compute both median AND percentiles in `merchant_metrics` daily job (cheap). Use multipliers by default. Auto-switch to percentiles once threshold met.
+
+---
+
 ## 2026-05-04 — GitHub repo created
 
 **Decision:** Private repo at `https://github.com/advancedtechhd-a11y/CLM` (under same org as VidForge). Branch: `main`. Local folder name and repo name differ — local is `lifecycle-dev`, repo is `CLM` — final product name TBD; either can be renamed later.

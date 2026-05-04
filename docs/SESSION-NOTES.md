@@ -1,6 +1,62 @@
 # Session Notes — pick up here next time
 
-## 📅 Last session: 2026-05-04
+## 📅 Session: 2026-05-05 (today)
+
+### What got done
+- 📥 User shared `PRODUCT_SPEC.md` (2,126 lines) — alternative spec to compare against ours
+- 🔍 Full gap analysis between our 18 docs and PRODUCT_SPEC
+- ✅ **Lifecycle framework upgraded:** 6 stages → **7 stages + 3 tiers + behavior badges** (see [[02-Lifecycle-Framework]])
+- ✅ **Median replaces mean** for all repurchase cycle calculations
+- ✅ **Threshold strategy locked:** Option A (multipliers) for MVP, Option B (percentiles) auto-upgrade at >200 customers
+- ✅ Decisions logged in [[15-Decisions-Log]]
+
+### Major gaps identified in our spec (still TO ADOPT)
+
+These features are in PRODUCT_SPEC but not yet integrated into our docs:
+
+🔴 **Tier 1 — Major missing features (decided to adopt, not yet written into docs):**
+1. Customer Health Score (0-100 composite per customer with 5 sub-scores)
+2. Revenue at Risk (merchant-level dollar hero metric)
+3. First-to-Second Purchase Tracker (dedicated metric with industry benchmarks)
+4. Customer Concentration Risk (Pareto top-10% concentration)
+5. Discount Dependency Score (per-customer + merchant-wide)
+
+🟡 **Tier 2 — Should adopt for v1.5+:**
+6. Saturation/Fatigue Detection (cross-channel touch tracking)
+7. Replenishment Layer (subscription opt-in detection)
+8. Customer Concierge Timeline (full event log per customer)
+9. Predicted vs Actual public widget (credibility builder)
+10. Acquisition Quality Score (UTM source × CLV/churn)
+11. Margin-Aware Recommendations (profit, not revenue)
+
+🏗️ **Tier 3 — Architecture/business model decisions still pending:**
+12. Pricing tier update — adopt PRODUCT_SPEC's $99/$249/$599 instead of our $39/$99/$249/$499?
+13. Shopify-first + Shopify Billing API + App Store from day 1?
+14. ML Privacy Framework + Isolated Mode (enterprise tier opt-out)
+15. Holdout testing for causal attribution
+16. Conversational LLM-driven onboarding (vs static wizard)
+17. Quarterly Industry Benchmark Report (marketing strategy)
+18. Today View as primary daily screen (UX framing)
+
+### Next session — start here
+1. Continue gap analysis: walk through Tier 1 features one by one and write them into our docs
+   - Start with Customer Health Score (biggest single addition)
+   - Then Revenue at Risk
+   - Then First-to-Second, Concentration Risk, Discount Dependency
+2. Discuss Tier 3 architecture decisions (pricing, distribution, ML privacy)
+3. Decide: do these gaps go into existing docs (02-17) or a new doc 18-Differentiating-Metrics?
+4. After spec merge: fix the dev server / Tailwind issue from 5/4 session
+5. Then resume Week 2-3 build
+
+### Files updated this session
+- `02-Lifecycle-Framework.md` — rewrote with 7+3 framework, median, multiplier thresholds
+- `03-Segmentation.md` — updated tier structure (3 tiers, not 4), updated stage list
+- `15-Decisions-Log.md` — added 3 new decisions
+- `SESSION-NOTES.md` — this file
+
+---
+
+## 📅 Earlier session: 2026-05-04
 
 ### What got done
 - ✅ Project scaffolding (folder structure, .gitignore, README, CLAUDE.md)

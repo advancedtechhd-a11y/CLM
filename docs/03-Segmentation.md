@@ -7,22 +7,24 @@ Segmentation is a first-class capability, not a sub-feature. Banks treat it that
 All auto-computed where possible, all dynamic (update as data changes), all exportable to execution tools.
 
 ### 1. Lifecycle stage segments (auto)
-From [[02-Lifecycle-Framework]] — every customer is in exactly one of these:
-- Acquisition (with sub-stages: newsletter, account, cart, trial)
-- Onboarding
-- Engagement
-- Retention (At Risk)
-- Win-back (4 tiers: Light Lapsed, Moderate, Deep, Dormant)
-- Advocacy
+From [[02-Lifecycle-Framework]] — every customer is in exactly one of 7 stages:
+- Lead (no purchase yet)
+- New (in onboarding window)
+- Active (on cycle)
+- Slipping (1.0-1.5× median cycle)
+- At Risk (1.5-2.5× median)
+- Churned (> 2.5× median, in 4-tier win-back sequence)
+- Dormant (failed final win-back, archived)
 
 ### 2. Value tier segments (auto, CLV-based)
-Computed from [[04-CLV-Model]]:
-- Platinum (top 5% predicted CLV)
-- Gold (next 15%)
-- Silver (next 30%)
-- Bronze (bottom 50%)
+Computed from [[04-CLV-Model]] — 3 tiers (orthogonal to lifecycle stage):
+- **VIP** — top 5% predicted CLV
+- **Premium** — top 20% predicted CLV (excluding VIP)
+- **Standard** — bottom ~80%
 
-Used for budget allocation in offers (premium spend on Platinum, low-cost on Bronze).
+Used for budget allocation in offers (premium spend on VIP, low-cost on Standard).
+
+A customer is described by both: `Active + VIP`, `At Risk + Premium`, `Churned + Standard`, etc.
 
 ### 3. RFM segments (auto, industry-standard 11-segment model)
 
@@ -68,9 +70,10 @@ Defined via simple rule builder (drag-drop conditions). Stored as queries that r
 ## How segments are used
 
 ### Trigger source for programs
-Each program in our system has a segment as its trigger:
-- "Win-back Tier 3" program → fires for customers in (Lifecycle = Win-back) AND (Tier = Deep Lapsed)
-- "VIP early access" → fires for customers in Advocacy + Platinum tier
+Each program in our system has a segment (or combination) as its trigger:
+- "Win-back Tier 3" → customers in `Churned` + (Premium OR VIP) + Tier 3 of win-back sequence
+- "VIP early access" → customers in `Active` + `VIP` + has `champion` advocacy badge
+- "At-Risk Premium Save" → customers in `At Risk` + (Premium OR VIP)
 
 ### Export to execution tools
 Every segment can be pushed as a live segment to:
@@ -83,17 +86,20 @@ Every segment can be pushed as a live segment to:
 Updates automatically when customers cross thresholds.
 
 ### Overlap intelligence
-A customer can be in multiple segments. The system shows overlaps and prioritizes:
-- "Sarah is in: Engagement (lifecycle) + Gold (value) + Multi-category (behavioral) + Champions (RFM)"
-- For messaging: highest-priority segment wins (usually lifecycle stage takes precedence)
-- Avoids over-messaging the same customer
+A customer always has at minimum: 1 lifecycle stage + 1 value tier. Most also have RFM + behavioral classifications.
+
+Example: "Sarah is `Active + VIP`, RFM Champion, Multi-category buyer, Full-price loyal, has `referrer` badge"
+
+For messaging: lifecycle stage takes precedence (it determines which campaigns are eligible), tier modifies offer intensity, behavioral tags refine the offer type.
+
+Avoids over-messaging the same customer (see fatigue detection in [[18-Differentiating-Metrics]] when added).
 
 ## Segment health monitoring
 
 Dashboard shows:
-- Segment size trends (Platinum growing? Dormant shrinking?)
-- Stage transition rates (Onboarding → Engagement %)
-- Cross-tier migrations (Bronze → Silver upgrades)
+- Segment size trends (VIP growing? Dormant shrinking?)
+- Stage transition rates (New → Active conversion %)
+- Cross-tier migrations (Standard → Premium upgrades)
 
 Alerts fire when:
 - Segment grows/shrinks > 20% in a week (anomaly)
