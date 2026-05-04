@@ -58,8 +58,10 @@
 - `11-Integrations.md` — **Shopify-first** (was Stripe-first), Shopify Billing API, CSV fallback
 - `12-Pricing.md` — **$99/$249/$599/$999** tiers
 - `14-Build-Plan.md` — 19-21 weeks, integrated metrics into Phase 3 + 7
-- `15-Decisions-Log.md` — 5 new dated decisions
+- `15-Decisions-Log.md` — 6 new dated decisions
 - `18-Differentiating-Metrics.md` — **NEW** — Health Score, Revenue at Risk, First-to-Second, Concentration Risk, Discount Dependency
+- `19-Multi-Platform-Roadmap.md` — **NEW** — Adapter pattern, BigCommerce + WooCommerce + Salla + Zid + Magento expansion roadmap. **MENA (Salla/Zid) flagged as founder's unique strategic edge**
+- `README.md` — Shopify-first positioning
 - `SESSION-NOTES.md` — this file
 
 ---

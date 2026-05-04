@@ -1,5 +1,7 @@
 # 11 — Integrations
 
+For long-term multi-platform expansion strategy (BigCommerce, WooCommerce, Salla, Zid, Magento, etc.), see [[19-Multi-Platform-Roadmap]].
+
 ## Phase 1 (MVP) — Shopify-first
 
 Distribution strategy: **Shopify App Store + Shopify Billing API from day 1.** This is the major change from earlier drafts that proposed Stripe-first.

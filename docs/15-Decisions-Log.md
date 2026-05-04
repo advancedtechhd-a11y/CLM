@@ -218,6 +218,24 @@ Lead → New → Active → Slipping → At Risk → Churned → Dormant
 - If 1-2 purchases: blend customer + merchant median (weighted by data confidence)
 - If 0-1 purchases: fall back to merchant median entirely
 
+## 2026-05-05 — Multi-platform roadmap defined
+
+**Decision:** Build MVP Shopify-only with `PlatformAdapter` abstraction baked in. Phased expansion: BigCommerce + WooCommerce in v2 (months 4-9), Salla + Zid (MENA) in v2.5 (months 9-12), Magento + Saleor + Medusa in v3 (months 12-18).
+
+**Strategic emphasis on MENA (Salla/Zid):**
+- Founder is UAE-based — natural geographic moat
+- US competitors (Lifetimely, Triple Whale, Klaviyo) will not prioritize MENA platforms for years
+- GCC merchants pay premium for tools, less price-sensitive
+- Arabic-language AI copy + RTL UI = real differentiator
+- BNPL signal handling (Tabby/Tamara) already maps perfectly
+- YC story strengthens: "we own MENA AI customer intelligence market"
+
+**Architecture investment in MVP:** Build `PlatformAdapter` interface even though only Shopify implements it for MVP. ~3-5 days extra work; saves 2+ months of refactoring later.
+
+**NEVER list:** PrestaShop, OpenCart, custom-built sites, Shopee Mall, Amazon Marketplace. CSV upload serves these.
+
+See [[19-Multi-Platform-Roadmap]] for full details.
+
 ## 2026-05-05 — Pricing changed to $99/$249/$599/$999
 
 **Trigger:** PRODUCT_SPEC merge analysis showed our pricing was too low for the buyer profile and product positioning.
