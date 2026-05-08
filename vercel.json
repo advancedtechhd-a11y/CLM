@@ -1,0 +1,36 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/detect-anomalies",
+      "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/cron/process-cart-abandonments",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/email-monthly-reports",
+      "schedule": "0 9 1 * *"
+    },
+    {
+      "path": "/api/cron/compute-daily-metrics",
+      "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/compute-cohort-metrics",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-events",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/detect-stuck-backfills",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/detect-stuck-cron-runs",
+      "schedule": "0 7 * * *"
+    }
+  ]
+}
