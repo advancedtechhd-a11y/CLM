@@ -1,5 +1,108 @@
 # Session Notes — pick up here next time
 
+## 📅 Session: 2026-05-08 — v1.5 widget dashboard + Phase 8 scale hardening BUILT + COMMITTED
+
+### What got done (full day)
+
+- ✅ **v1.5 widget dashboard built end-to-end** across 8 phases (0/1/2/3/3.5/4/5/6/7). 5 new widgets (`geographic_spread`, `health_score_trend`, `cohort_health`, `recent_activity`, `anomalies_panel`), 8 new migrations (0015-0022), 6 new cron routes, all theme-token-clean, all RLS-protected, all chunked-pattern-ready.
+- ✅ **Historical health backfill** (Phase 3.5) with full chunked-fire-and-forget chain + auto-recovery via `detect-stuck-backfills` cron + per-incident counter reset (caught + fixed mid-build by Kazim).
+- ✅ **Phase 8 scale hardening** — all 4 v1.5 crons (compute-daily-metrics, compute-cohort-metrics, detect-anomalies, email-monthly-reports) refactored to chunked self-firing using shared `lib/cron/chunked-handler.ts`. New `cron_runs` state table + `detect-stuck-cron-runs` cron at 7am UTC. Email cron has TWO layers of dedupe: atomic SQL claim + Resend `idempotencyKey`. Lifts merchant cap from ~30 (Vercel timeout cliff) to effectively unlimited.
+- ✅ **Local Supabase migrations applied** (0015-0023, 9 new tables/columns/alterations).
+- ✅ **Detector text quality validated** — all 6 anomaly metrics produce specific, day-of-week-named, magnitude-and-direction descriptions matching Kazim's spec bar ("Revenue down 22% — $1,840 yesterday vs $2,360 trailing Tuesday avg").
+- ✅ **Ops Runbook expanded to 11 entries**: stuck health backfill / manual health-backfill chunk re-fire / cron status / Supabase quick-inspect SQL / enable anomaly detection / rollback to legacy v1.1 / RLS isolation / stuck cron run recovery / failed cron run forensics / email partial-send recovery / Resend duplicate-key behavior verification (Day 19 deploy gate).
+- ✅ **Two new specs landed in repo at `docs/`**: `data-capture-roadmap.md` (Tier 1/2/3 data capture plan, 5-6 + 8 + 25-35 days), `pre-launch-scale-hardening.md` (12-item plan, ~7-9 days). Authored externally; pasted into repo for version control.
+- ✅ **All work committed locally** in 6 logical commits (NOT pushed to origin yet):
+  ```
+  092866a docs: update project status — v1.5 + Phase 8 shipped
+  001ec5b feat(scale): chunked crons + atomic-claim email + cron_runs state
+  c44471e feat(v1.5): phase 6 anomaly seasonality stack with sale auto-detection
+  dae6fc3 feat(v1.5): phases 2-5 widgets, crons, helpers, migrations
+  55a945f feat(v1.5): phase 0 helpers + phase 1 geo data foundation
+  cfb12d0 docs: add data capture roadmap + pre-launch scale hardening specs
+  ```
+- ✅ **Vercel + Railway pricing audit** — confirmed Kazim is on Hobby (Vercel) + Pro (Railway). Hobby tier prohibits commercial use AND has tighter cron limits than what LifecycleAI needs. Decision: upgrade Vercel to Pro before deploy. Verified $20 Pro plan from his upgrade flow screenshot.
+
+### Files modified/created today
+Too many to list inline. See the 6 commits above (`git log --oneline`). Net delta: ~3,500 lines of new code + ~2,500 lines of new docs.
+
+### What's NOT done (deliberate, queued for next session)
+- ❌ **Production deploy** — work is local-only. GitHub origin has none of today's commits. Vercel project not connected. Production Supabase (if separate from dev) doesn't have v1.5 migrations applied.
+- ❌ **Days 17-18 Shopify Billing API** — bumped behind production deploy per Kazim's call.
+- ❌ **Day 19 deploy gates** (anomaly rollback test + Resend duplicate-key behavior verification) — must run AFTER deploy.
+- ❌ **Days 20-21** — App Store listing + friend's-store live test + submit.
+- ❌ **Other uncommitted working tree work** — months of prior-session work (v1 admin panel, settings expansion, design system, etc.) is still uncommitted on disk. NOT today's problem; surface it after Day 19 deploy.
+
+---
+
+## 🚨 NEXT SESSION — START HERE (2026-05-09)
+
+**TOMORROW'S #1 PRIORITY:** get all of today's work into live production. The infrastructure is ready, the code is committed locally, but nothing is live.
+
+### Step 1: Push commits to GitHub origin
+```bash
+git push origin main
+```
+6 commits will land. Verify on GitHub.
+
+### Step 2: Upgrade Vercel from Hobby to Pro ($20/mo)
+- Visit vercel.com — open the upgrade flow Kazim already saw
+- UAE billing details already pre-filled on the form
+- Pay → Pro activated
+- **Why this MUST happen before deploy:** Hobby tier prohibits commercial use (LifecycleAI is a paid SaaS) AND has tighter cron limits than our 8 active crons need.
+
+### Step 3: Connect Vercel project to lifecycle-dev GitHub repo
+- New project in Vercel dashboard → import from GitHub → select lifecycle-dev
+- Initial deploy will fail because env vars are missing — that's expected, set them next.
+
+### Step 4: Set production env vars in Vercel
+Required:
+- `DATABASE_URL` — **MUST be Supabase pooler URL** (port 6543, not 5432) for serverless. See pre-launch-scale-hardening.md Item 2.
+- `CRON_SECRET` — generate a fresh 64-char hex (different from dev)
+- `RESEND_API_KEY` — get from resend.com/api-keys (verify domain `lifecycleai.app` or whatever)
+- `ENCRYPTION_KEY` — fresh 32+ char string for token encryption
+- All `SHOPIFY_*` keys (client_id, client_secret, scopes)
+- `NEXT_PUBLIC_APP_URL` — production domain
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- `EMAIL_FROM` — `LifecycleAI <reports@yourdomain>` (must match Resend verified domain)
+
+### Step 5: Apply migrations to production Supabase
+**If using same Supabase instance as dev:** migrations 0015-0023 are already applied (we did this in Phase 7).
+**If using a separate prod Supabase:** clone schema or run `npx tsx scripts/run-migrations.ts` against prod DATABASE_URL.
+
+### Step 6: Trigger first deploy + verify
+- Push triggers redeploy automatically
+- Watch Vercel build log — should be green (we verified `npm run build` clean locally)
+- Visit production URL → sign in → verify dashboard loads
+
+### Step 7: Verify the 8 cron jobs
+- Vercel dashboard → Cron Jobs tab
+- All 8 crons should be listed and "scheduled"
+- Manually trigger `compute-daily-metrics` once via curl with Bearer auth to smoke-test
+  ```bash
+  curl -H "Authorization: Bearer $CRON_SECRET" https://<your-domain>/api/cron/compute-daily-metrics
+  ```
+
+### Step 8: Run the two deferred Day 19 gates
+**Gate 1: Anomaly rollback path** (Ops Runbook entry 6)
+- Edit vercel.json — change cron path from `/api/cron/detect-anomalies` to `/api/cron/detect-anomalies-legacy`
+- Push → redeploy → verify legacy cron fires
+- Swap back, push, verify seasonality cron fires
+- Document the actual rollback time (target: <10 minutes)
+
+**Gate 2: Resend duplicate-key behavior** (Ops Runbook entry 11)
+- Send same idempotency key twice via prod Resend
+- Capture actual HTTP response codes + error body shapes
+- Update Ops Runbook entry 10's forensics guidance with observed reality
+
+### Step 9: ONLY THEN proceed to Days 17-18 (Shopify Billing API)
+Don't skip ahead. Production deploy is the gate.
+
+### Carry-overs from today (low priority for tomorrow but flag-worthy)
+- Massive amount of pre-v1.5 working tree still uncommitted (admin panel, design system, etc.). Address in a separate session AFTER Day 19 deploy is green.
+- Garbage shell-redirect filenames in working tree (`?? !r.ok)`, `?? 2x`, etc.) — clean up with `rm` when convenient.
+
+---
+
 ## 📅 Session: 2026-05-07 evening — Widget Dashboard v2 finalization + v1.5 spec lockdown
 
 ### What got done

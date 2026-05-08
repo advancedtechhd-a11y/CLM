@@ -1,6 +1,6 @@
 # LifecycleAI — Project Status
 
-**Last updated:** 2026-05-08 evening (**v1.5 widget dashboard SHIPPED + Phase 8 scale hardening SHIPPED**. 5 new widgets, 8 active crons all chunked, 23 migrations applied, 11-entry Ops Runbook. Day 17-21 launch plumbing remains. See "v1.5 — BUILT" section + "Phase 8 — Scale Hardening" section below.)
+**Last updated:** 2026-05-08 end-of-session (v1.5 + Phase 8 shipped + committed in 6 logical commits; resume tomorrow — **TOMORROW'S #1 PRIORITY: production deploy** to Vercel/Supabase/GitHub. All locally-built work needs to land in production. See SESSION-NOTES.md "Next session — START HERE" for the exact resume sequence.)
 **Sessions logged:** see `SESSION-NOTES.md`
 **Master plan:** see `14-Build-Plan.md`
 **MVP work plan:** see locked scope at top of this file (Days 1-21)
@@ -19,8 +19,8 @@
 | **+** | **Settings expansion (Tiers 1-2)** | ✅ **COMPLETE — 9-section sidebar layout, see new section below** |
 | **+** | **Full shadcn/ui design system refactor** | ✅ **COMPLETE — 60+ pages migrated, teal #0F6E56 primary, dark mode tokens ready, see new section below** |
 | **+** | **Customizable widget dashboard v1** | ✅ **COMPLETE — 11 widgets, drag/resize/add/remove/undo/reset, lives at `/dashboard/grid` alongside classic, see new section below** |
-| 17-18 | Shopify Billing API + Settings billing wiring | ⏳ Pending |
-| 19 | Production deploy (Vercel + Railway + domain) | ⏳ Pending — **TWO deploy gates** before declaring complete: (1) verify v1.5 anomaly rollback path live (see Ops Runbook entry 6 — swap vercel.json path, confirm legacy cron fires, swap back); (2) verify Resend duplicate-send behavior — send a test email twice with the same `idempotencyKey` via the production Resend account, capture actual HTTP response codes and error messages, document the observed behavior in Ops Runbook entry 11 |
+| 17-18 | Shopify Billing API + Settings billing wiring | ⏳ Pending — sequenced AFTER production deploy now (Kazim's call 2026-05-08: deploy infrastructure first to capture all the v1.5 + Phase 8 work in production, billing API second). |
+| 19 | **🚨 PRODUCTION DEPLOY — NEXT SESSION TOP PRIORITY** | ⏳ **DO THIS FIRST 2026-05-09**. Push commits to GitHub origin, connect Vercel project to repo, set env vars (DATABASE_URL pooler URL, CRON_SECRET, RESEND_API_KEY, ENCRYPTION_KEY, all Shopify keys, NEXT_PUBLIC_APP_URL, SUPABASE keys), upgrade Vercel account from Hobby to Pro ($20/mo, commercial use + cron schedules require it), apply migrations 0015-0023 to **production** Supabase (currently only on dev), verify all 8 crons run cleanly post-deploy. Two deploy gates before declaring complete: (1) verify v1.5 anomaly rollback path live (Ops Runbook entry 6 — swap vercel.json path, confirm legacy cron fires, swap back); (2) verify Resend duplicate-send behavior — send a test email twice with the same `idempotencyKey` via the production Resend account, capture actual HTTP response codes, document in Ops Runbook entry 11. |
 | 20 | App Store listing assets | ⏳ Pending |
 | 21 | Friend's-store live test + submit | ⏳ Pending — also the live verification of seasonality detector on real merchant data (seeded dev data too thin to trigger 3σ; real merchant volume needed to confirm threshold tuning) |
 
