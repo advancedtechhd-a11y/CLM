@@ -303,11 +303,16 @@ export async function computeCustomerMetrics(
 
 // ============================================================
 // HELPERS — Lifecycle Stage Classification
+//
+// `asOfDate` lets the historical-health backfill (lib/metrics/historical-backfill.ts)
+// reconstruct lifecycle state at any point in the past. Defaults to now for the
+// nightly rules engine.
 // ============================================================
-function classifyLifecycleStage(
+export function classifyLifecycleStage(
   c: CustomerData,
   recencyDays: number | null,
-  expectedCycle: number
+  expectedCycle: number,
+  asOfDate: Date = new Date()
 ): string {
   if ((c.orders_count ?? 0) === 0) {
     return "lead";
@@ -319,7 +324,7 @@ function classifyLifecycleStage(
   // First 90 days post first order = New (in onboarding window)
   const firstOrder = c.first_order_at ? new Date(c.first_order_at) : null;
   if (firstOrder) {
-    const daysSinceFirst = daysBetween(firstOrder, new Date());
+    const daysSinceFirst = daysBetween(firstOrder, asOfDate);
     const onboardingWindow = Math.max(90, Math.round(expectedCycle * 1.5));
     if (daysSinceFirst <= onboardingWindow && c.orders_count === 1) {
       return "new";
@@ -337,7 +342,7 @@ function classifyLifecycleStage(
 // ============================================================
 // HELPERS — RFM Scoring (1-5 scale)
 // ============================================================
-function scoreRecency5(recencyDays: number | null, expectedCycle: number): number {
+export function scoreRecency5(recencyDays: number | null, expectedCycle: number): number {
   if (recencyDays === null) return 1;
   const ratio = expectedCycle > 0 ? recencyDays / expectedCycle : 0;
   if (ratio <= 0.5) return 5;
@@ -347,7 +352,7 @@ function scoreRecency5(recencyDays: number | null, expectedCycle: number): numbe
   return 1;
 }
 
-function scoreFrequency5(orders: number, mm: MerchantMetricsRow): number {
+export function scoreFrequency5(orders: number, mm: MerchantMetricsRow): number {
   if (orders >= mm.p90_orders_per_customer) return 5;
   if (orders >= mm.median_orders_per_customer + 2) return 4;
   if (orders >= mm.median_orders_per_customer) return 3;
@@ -355,7 +360,7 @@ function scoreFrequency5(orders: number, mm: MerchantMetricsRow): number {
   return 1;
 }
 
-function scoreMonetary5(spent: number, mm: MerchantMetricsRow): number {
+export function scoreMonetary5(spent: number, mm: MerchantMetricsRow): number {
   if (spent >= mm.spend_p95) return 5;
   if (spent >= mm.spend_p80) return 4;
   if (spent >= mm.spend_p50) return 3;
@@ -363,7 +368,7 @@ function scoreMonetary5(spent: number, mm: MerchantMetricsRow): number {
   return 1;
 }
 
-function classifyRFM(r: number, f: number, m: number): string {
+export function classifyRFM(r: number, f: number, m: number): string {
   if (r >= 4 && f >= 4 && m >= 4) return "champions";
   if (r >= 3 && f >= 4 && m >= 4) return "loyal_customers";
   if (r >= 4 && f <= 2 && m <= 2) return "new_customers";
@@ -381,7 +386,7 @@ function classifyRFM(r: number, f: number, m: number): string {
 // ============================================================
 // HELPERS — Value Tier
 // ============================================================
-function classifyValueTier(spent: number, allSpend: number[]): string {
+export function classifyValueTier(spent: number, allSpend: number[]): string {
   if (allSpend.length < 5) return "standard";
   const p80 = percentile(allSpend, 80);
   const p95 = percentile(allSpend, 95);
@@ -393,7 +398,7 @@ function classifyValueTier(spent: number, allSpend: number[]): string {
 // ============================================================
 // HELPERS — Churn Probability (Rules-based for MVP)
 // ============================================================
-function computeChurnProb(ordersCount: number, cycleRatio: number | null): number {
+export function computeChurnProb(ordersCount: number, cycleRatio: number | null): number {
   if (ordersCount === 0 || cycleRatio === null) return 0.5; // unknown
   if (cycleRatio < 0.5) return 0.05;
   if (cycleRatio < 1.0) return 0.1;
@@ -407,7 +412,7 @@ function computeChurnProb(ordersCount: number, cycleRatio: number | null): numbe
 // ============================================================
 // HELPERS — Health Score
 // ============================================================
-interface HealthInput {
+export interface HealthInput {
   cycleRatio: number | null;
   ordersCount: number;
   mmMedianOrders: number;
@@ -421,7 +426,7 @@ interface HealthInput {
   emailUnsubscribed: boolean;
 }
 
-function computeHealthScore(input: HealthInput) {
+export function computeHealthScore(input: HealthInput) {
   // Recency Score (30% weight)
   let recencyScore: number;
   const cr = input.cycleRatio ?? 1.0;
