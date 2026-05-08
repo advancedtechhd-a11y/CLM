@@ -74,10 +74,10 @@ async function syncCustomers(ctx: SyncContext): Promise<number> {
   const PAGE_SIZE = 250;
 
   while (true) {
-    const path = sinceId
+    const path: string = sinceId
       ? `/customers.json?limit=${PAGE_SIZE}&since_id=${sinceId}`
       : `/customers.json?limit=${PAGE_SIZE}`;
-    const resp = await ctx.shopify.get<{ customers: ShopifyCustomer[] }>(path);
+    const resp: { customers: ShopifyCustomer[] } = await ctx.shopify.get<{ customers: ShopifyCustomer[] }>(path);
     if (resp.customers.length === 0) break;
 
     for (const c of resp.customers) {
@@ -85,15 +85,19 @@ async function syncCustomers(ctx: SyncContext): Promise<number> {
         ? require("node:crypto").createHash("sha256").update(c.email.toLowerCase()).digest("hex")
         : null;
 
+      const geo = extractCustomerGeo(c);
+
       await ctx.pg.query(
         `
         INSERT INTO public.customers (
           merchant_id, external_id, email, email_hash, phone, first_name, last_name,
           total_spent, orders_count, first_order_at, last_order_at,
           email_marketing_consent, sms_marketing_consent,
-          tags, raw_data, last_synced_at
+          tags, raw_data,
+          country_code, country_name, region, city,
+          last_synced_at
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW())
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, NOW())
         ON CONFLICT (merchant_id, external_id) DO UPDATE SET
           email = EXCLUDED.email,
           email_hash = EXCLUDED.email_hash,
@@ -108,6 +112,10 @@ async function syncCustomers(ctx: SyncContext): Promise<number> {
           sms_marketing_consent = EXCLUDED.sms_marketing_consent,
           tags = EXCLUDED.tags,
           raw_data = EXCLUDED.raw_data,
+          country_code = COALESCE(EXCLUDED.country_code, public.customers.country_code),
+          country_name = COALESCE(EXCLUDED.country_name, public.customers.country_name),
+          region       = COALESCE(EXCLUDED.region,       public.customers.region),
+          city         = COALESCE(EXCLUDED.city,         public.customers.city),
           last_synced_at = NOW(),
           updated_at = NOW()
         `,
@@ -125,8 +133,12 @@ async function syncCustomers(ctx: SyncContext): Promise<number> {
           c.last_order_at ?? null,
           c.email_marketing_consent?.state === "subscribed",
           c.sms_marketing_consent?.state === "subscribed",
-          c.tags ? c.tags.split(",").map((t) => t.trim()) : [],
+          c.tags ? c.tags.split(",").map((t: string) => t.trim()) : [],
           c,
+          geo.country_code,
+          geo.country_name,
+          geo.region,
+          geo.city,
         ]
       );
       totalSynced++;
@@ -149,10 +161,10 @@ async function syncOrders(ctx: SyncContext): Promise<{ orders: number; lineItems
   const PAGE_SIZE = 250;
 
   while (true) {
-    const path = sinceId
+    const path: string = sinceId
       ? `/orders.json?limit=${PAGE_SIZE}&status=any&since_id=${sinceId}`
       : `/orders.json?limit=${PAGE_SIZE}&status=any`;
-    const resp = await ctx.shopify.get<{ orders: ShopifyOrder[] }>(path);
+    const resp: { orders: ShopifyOrder[] } = await ctx.shopify.get<{ orders: ShopifyOrder[] }>(path);
     if (resp.orders.length === 0) break;
 
     for (const o of resp.orders) {
@@ -334,6 +346,13 @@ interface ShopifyProduct {
   variants: Array<{ price: string }>;
 }
 
+interface ShopifyAddress {
+  country_code?: string | null;
+  country?: string | null; // full country name (Shopify field)
+  province?: string | null;
+  city?: string | null;
+}
+
 interface ShopifyCustomer {
   id: number;
   email: string | null;
@@ -347,6 +366,26 @@ interface ShopifyCustomer {
   email_marketing_consent: { state: string } | null;
   sms_marketing_consent: { state: string } | null;
   tags: string;
+  default_address?: ShopifyAddress | null;
+  addresses?: ShopifyAddress[];
+}
+
+/**
+ * Extract country_code / country_name / region / city from a Shopify
+ * customer payload, preferring default_address and falling back to the
+ * first entry of addresses[].
+ */
+export function extractCustomerGeo(c: {
+  default_address?: ShopifyAddress | null;
+  addresses?: ShopifyAddress[];
+}) {
+  const addr = c.default_address ?? c.addresses?.[0] ?? null;
+  return {
+    country_code: addr?.country_code ?? null,
+    country_name: addr?.country ?? null,
+    region: addr?.province ?? null,
+    city: addr?.city ?? null,
+  };
 }
 
 interface ShopifyOrder {

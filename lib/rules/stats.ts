@@ -25,6 +25,14 @@ export function mean(arr: number[]): number {
   return arr.reduce((s, v) => s + v, 0) / arr.length;
 }
 
+export function standardDeviation(arr: number[]): number {
+  if (arr.length < 2) return 0;
+  const m = mean(arr);
+  const squaredDiffs = arr.map((v) => (v - m) ** 2);
+  const variance = squaredDiffs.reduce((s, v) => s + v, 0) / (arr.length - 1);
+  return Math.sqrt(variance);
+}
+
 export function daysBetween(a: Date | string, b: Date | string): number {
   const da = typeof a === "string" ? new Date(a) : a;
   const db = typeof b === "string" ? new Date(b) : b;

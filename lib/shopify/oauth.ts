@@ -147,6 +147,7 @@ export interface ShopMetadata {
   iana_timezone: string;
   shop_owner: string;
   country_code: string;
+  country_name: string;
   plan_name: string;
 }
 

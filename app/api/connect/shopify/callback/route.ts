@@ -106,6 +106,8 @@ export async function GET(request: NextRequest) {
         store_name: shopMeta?.name ?? null,
         store_currency: shopMeta?.currency ?? "USD",
         store_timezone: shopMeta?.iana_timezone ?? null,
+        country_code: shopMeta?.country_code ?? null,
+        country_name: shopMeta?.country_name ?? null,
         status: "active",
         installed_at: new Date().toISOString(),
         uninstalled_at: null,
@@ -120,9 +122,24 @@ export async function GET(request: NextRequest) {
     return errorRedirect(origin, "db_error");
   }
 
-  // 8. Clear OAuth cookies and redirect to dashboard
-  const successUrl = new URL("/dashboard", origin);
-  successUrl.searchParams.set("connected", shop);
+  // 7b. Register webhooks (fire-and-forget — don't block redirect on this).
+  // We use the merchant's tokenResponse.access_token (plaintext) since this is the install moment.
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL ?? origin;
+  const { registerAllWebhooks } = await import("@/lib/shopify/webhooks");
+  registerAllWebhooks(shop, tokenResponse.access_token, appBaseUrl)
+    .then((r) => {
+      console.log(`[Shopify OAuth] Webhooks registered for ${shop}: ${r.registered.join(", ")}`);
+      if (r.failed.length > 0) {
+        console.warn(`[Shopify OAuth] Webhook failures:`, r.failed);
+      }
+    })
+    .catch((err) => console.error(`[Shopify OAuth] Webhook registration error:`, err));
+
+  // 8. Clear OAuth cookies and redirect into onboarding setup with auto-start flag.
+  // The setup runner picks up `?just_connected=1` and immediately fires the pipeline
+  // (sync → score → brand voice → strategy) so the merchant doesn't need to click anything.
+  const successUrl = new URL("/onboarding/setup", origin);
+  successUrl.searchParams.set("just_connected", "1");
   const response = NextResponse.redirect(successUrl);
   response.cookies.delete("shopify_oauth_state");
   response.cookies.delete("shopify_oauth_shop");
